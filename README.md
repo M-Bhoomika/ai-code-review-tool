@@ -4,6 +4,22 @@ An AI-powered code review platform that automatically reviews GitHub pull
 requests, processes work asynchronously, orchestrates analysis with LangGraph
 workflows, and surfaces insights through an analytics dashboard.
 
+## Key Features
+
+- GitHub App webhook ingestion
+- Asynchronous review processing with Celery + Redis
+- LangGraph-based review orchestration
+- AI-generated code review comments
+- ChromaDB vector retrieval
+- PostgreSQL persistence with Alembic migrations
+- GraphQL analytics
+- OpenTelemetry + Jaeger tracing
+- Prometheus + Grafana monitoring
+- MLflow experiment tracking
+- Docker Compose deployment
+- Kubernetes and Helm deployment support
+- Playwright end-to-end testing
+
 ## What It Does
 
 - Installs as a GitHub App and listens for pull request webhook events.
@@ -12,6 +28,21 @@ workflows, and surfaces insights through an analytics dashboard.
 - Persists results and exposes metrics for an analytics dashboard.
 
 ## Architecture Overview
+
+### System Flow
+
+```
+GitHub Pull Request
+→ GitHub Webhook
+→ FastAPI API
+→ Redis Queue
+→ Celery Worker
+→ LangGraph Review Pipeline
+→ LLM Analysis
+→ GitHub Review Comments
+→ PostgreSQL + GraphQL Analytics
+→ Dashboard / Observability
+```
 
 The project is a monorepo composed of independently deployable services:
 
@@ -111,13 +142,15 @@ All services run locally using free, open-source images.
 
 ## Tech Stack
 
-- **Backend:** Python 3.11, FastAPI, Uvicorn, pydantic-settings
+- **Backend:** Python 3.11, FastAPI, Uvicorn, pydantic-settings, GraphQL, PyGithub
 - **Persistence:** SQLAlchemy 2.0, Alembic, PostgreSQL (psycopg 3)
-- **Worker:** Celery, Redis
+- **Worker:** Celery, Redis, LangGraph, OpenAI API
 - **Frontend:** Next.js 14, React 18, TypeScript (strict)
 - **Data:** PostgreSQL, Redis, ChromaDB
-- **Observability:** Prometheus, Grafana, Jaeger
+- **Observability:** OpenTelemetry, Jaeger, Prometheus, Grafana
 - **ML Ops:** MLflow
+- **Deployment:** Docker Compose, Kubernetes, Helm
+- **Testing:** pytest, Playwright
 
 ## Setup
 
@@ -189,3 +222,17 @@ see [`infrastructure/prometheus/README.md`](infrastructure/prometheus/README.md)
 
 For MLflow experiment tracking setup and validation,
 see [`infrastructure/mlflow/README.md`](infrastructure/mlflow/README.md).
+
+## Validation
+
+The repository includes validation coverage for:
+
+- **API tests** — `pytest` in `api/tests/` (see [Tests](#tests) above)
+- **Worker tests** — `pytest` in `worker/tests/` (see [Tests](#tests) above)
+- **Playwright E2E tests** — browser specs in `frontend/e2e/`; CI runs integration tests via [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml)
+- **LangGraph orchestration path** — `scripts/e2e_validate.py` asserts LangGraph runs are recorded in MLflow
+- **Jaeger tracing validation** — `scripts/tracing_validate.py`; see [`infrastructure/tracing/README.md`](infrastructure/tracing/README.md)
+- **Prometheus metrics validation** — `scripts/prometheus_validate.py`; see [`infrastructure/prometheus/README.md`](infrastructure/prometheus/README.md)
+- **MLflow tracking validation** — `scripts/mlflow_validate.py`; see [`infrastructure/mlflow/README.md`](infrastructure/mlflow/README.md)
+- **Kubernetes manifest validation** — `scripts/k8s_manifest_validate.py`; see [`infrastructure/k8s/README.md`](infrastructure/k8s/README.md)
+- **Helm validation** — `helm lint infrastructure/helm/ai-code-review`; see [`infrastructure/helm/README.md`](infrastructure/helm/README.md)
