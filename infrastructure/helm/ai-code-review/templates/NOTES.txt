@@ -1,0 +1,22 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Release: {{ .Release.Name }}
+Namespace: {{ include "ai-code-review.namespace" . }}
+
+The AI Code Review platform has been deployed with Helm.
+
+1. Check pod status:
+
+   kubectl -n {{ include "ai-code-review.namespace" . }} get pods
+
+2. Port-forward the API and dashboard:
+
+   kubectl -n {{ include "ai-code-review.namespace" . }} port-forward svc/{{ .Values.api.service.name }} {{ .Values.api.service.port }}:{{ .Values.api.service.port }}
+   kubectl -n {{ include "ai-code-review.namespace" . }} port-forward svc/{{ .Values.frontend.service.name }} {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }}
+
+3. Open:
+
+   API health: http://localhost:{{ .Values.api.service.port }}/health
+   Dashboard:  http://localhost:{{ .Values.frontend.service.port }}/dashboard
+
+See infrastructure/helm/README.md for configuration and upgrade notes.

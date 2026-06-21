@@ -1,0 +1,54 @@
+{{- if .Values.jaeger.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.jaeger.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "jaeger") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.jaeger.service.type }}
+  selector:
+    {{- include "ai-code-review.componentSelectorLabels" (dict "component" "jaeger") | nindent 4 }}
+  ports:
+    - name: ui
+      port: {{ .Values.jaeger.service.uiPort }}
+      targetPort: {{ .Values.jaeger.service.uiPort }}
+    - name: otlp-grpc
+      port: {{ .Values.jaeger.service.otlpPort }}
+      targetPort: {{ .Values.jaeger.service.otlpPort }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jaeger.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "jaeger") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ai-code-review.componentSelectorLabels" (dict "component" "jaeger") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ai-code-review.componentLabels" (dict "component" "jaeger") | nindent 8 }}
+    spec:
+      containers:
+        - name: jaeger
+          image: {{ include "ai-code-review.image" .Values.jaeger.image }}
+          imagePullPolicy: {{ .Values.jaeger.image.pullPolicy }}
+          env:
+            - name: COLLECTOR_OTLP_ENABLED
+              value: "true"
+          ports:
+            - containerPort: {{ .Values.jaeger.service.uiPort }}
+              name: ui
+            - containerPort: {{ .Values.jaeger.service.otlpPort }}
+              name: otlp-grpc
+          resources:
+            {{- toYaml .Values.jaeger.resources | nindent 12 }}
+{{- end }}

@@ -1,0 +1,84 @@
+{{- if .Values.chromadb.enabled }}
+{{- if .Values.chromadb.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chromadb-data
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "chromadb") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.chromadb.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.chromadb.persistence.size }}
+---
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.chromadb.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "chromadb") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.chromadb.service.type }}
+  selector:
+    {{- include "ai-code-review.componentSelectorLabels" (dict "component" "chromadb") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.chromadb.service.port }}
+      targetPort: {{ .Values.chromadb.service.targetPort }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.chromadb.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "chromadb") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.chromadb.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ai-code-review.componentSelectorLabels" (dict "component" "chromadb") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ai-code-review.componentLabels" (dict "component" "chromadb") | nindent 8 }}
+    spec:
+      containers:
+        - name: chromadb
+          image: {{ include "ai-code-review.image" .Values.chromadb.image }}
+          imagePullPolicy: {{ .Values.chromadb.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.chromadb.service.targetPort }}
+              name: http
+          {{- if .Values.chromadb.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          {{- end }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.chromadb.service.targetPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.chromadb.service.targetPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.chromadb.resources | nindent 12 }}
+      {{- if .Values.chromadb.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: chromadb-data
+      {{- end }}
+{{- end }}

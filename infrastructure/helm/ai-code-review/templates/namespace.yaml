@@ -1,0 +1,9 @@
+{{- if .Values.namespace.create }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "ai-code-review.namespace" . }}
+  labels:
+    app.kubernetes.io/part-of: code-review
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+{{- end }}

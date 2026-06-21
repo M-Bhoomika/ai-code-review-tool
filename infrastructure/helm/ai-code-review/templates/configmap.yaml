@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ai-code-review.configMapName" . }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    app.kubernetes.io/part-of: code-review
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+data:
+  POSTGRES_USER: {{ .Values.env.postgresUser | quote }}
+  POSTGRES_DB: {{ .Values.env.postgresDb | quote }}
+  REDIS_URL: {{ include "ai-code-review.redisUrl" . | quote }}
+  CHROMA_URL: {{ include "ai-code-review.chromaUrl" . | quote }}
+  USE_GITHUB_APP_AUTH: {{ .Values.env.useGithubAppAuth | quote }}
+  USE_LANGGRAPH: {{ .Values.env.useLanggraph | quote }}
+  OPENAI_MODEL: {{ .Values.env.openaiModel | quote }}
+  GITHUB_API_URL: {{ .Values.env.githubApiUrl | quote }}
+  GITHUB_APP_ID: {{ .Values.env.githubAppId | quote }}
+  NEXT_PUBLIC_API_URL: {{ .Values.env.nextPublicApiUrl | quote }}
+  OTEL_ENABLED: {{ .Values.env.otelEnabled | quote }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.env.otelExporterOtlpEndpoint | quote }}
+  OTEL_EXPORTER_OTLP_INSECURE: {{ .Values.env.otelExporterOtlpInsecure | quote }}
+  OTEL_SERVICE_NAME_API: {{ .Values.env.otelServiceNameApi | quote }}
+  OTEL_SERVICE_NAME_WORKER: {{ .Values.env.otelServiceNameWorker | quote }}
+  WORKER_METRICS_ENABLED: {{ .Values.env.workerMetricsEnabled | quote }}
+  WORKER_METRICS_PORT: {{ .Values.env.workerMetricsPort | quote }}
+  MLFLOW_ENABLED: {{ .Values.env.mlflowEnabled | quote }}
+  MLFLOW_TRACKING_URI: {{ .Values.env.mlflowTrackingUri | quote }}
+  MLFLOW_EXPERIMENT_NAME: {{ .Values.env.mlflowExperimentName | quote }}

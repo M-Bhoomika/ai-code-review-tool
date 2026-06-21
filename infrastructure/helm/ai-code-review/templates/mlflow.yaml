@@ -1,0 +1,85 @@
+{{- if .Values.mlflow.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.mlflow.persistence.claimName }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "mlflow") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mlflow.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.mlflow.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "mlflow") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.mlflow.service.type }}
+  selector:
+    {{- include "ai-code-review.componentSelectorLabels" (dict "component" "mlflow") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.mlflow.service.port }}
+      targetPort: {{ .Values.mlflow.service.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mlflow.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "mlflow") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ai-code-review.componentSelectorLabels" (dict "component" "mlflow") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ai-code-review.componentLabels" (dict "component" "mlflow") | nindent 8 }}
+    spec:
+      containers:
+        - name: mlflow
+          image: {{ include "ai-code-review.image" .Values.mlflow.image }}
+          imagePullPolicy: {{ .Values.mlflow.image.pullPolicy }}
+          env:
+            - name: MLFLOW_SERVER_ALLOWED_HOSTS
+              value: {{ .Values.mlflow.allowedHosts | quote }}
+          command:
+            - mlflow
+            - server
+            - --host
+            - 0.0.0.0
+            - --port
+            - {{ .Values.mlflow.service.port | quote }}
+            - --backend-store-uri
+            - sqlite:///mlflow/mlflow.db
+            - --default-artifact-root
+            - /mlflow/artifacts
+            - --serve-artifacts
+            - --allowed-hosts
+            - {{ .Values.mlflow.allowedHosts | quote }}
+          ports:
+            - containerPort: {{ .Values.mlflow.service.port }}
+              name: http
+          volumeMounts:
+            - name: mlflow-data
+              mountPath: /mlflow
+          resources:
+            {{- toYaml .Values.mlflow.resources | nindent 12 }}
+      volumes:
+        - name: mlflow-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.mlflow.persistence.claimName }}
+{{- end }}

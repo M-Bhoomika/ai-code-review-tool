@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: AI Code Review
+    orgId: 1
+    folder: AI Code Review
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

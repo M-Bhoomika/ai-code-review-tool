@@ -1,0 +1,16 @@
+.env
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.cursor/
+playwright-report/
+test-results/
+secret.yaml
+api/e2e-playwright.db
+*.log
+.DS_Store

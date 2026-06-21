@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: code-review-config
+  namespace: code-review
+  labels:
+    app.kubernetes.io/part-of: code-review
+data:
+  # Postgres service identity (password comes from Secret)
+  POSTGRES_USER: "postgres"
+  POSTGRES_DB: "code_review"
+
+  # In-cluster service URLs (match docker-compose service names)
+  REDIS_URL: "redis://redis:6379/0"
+  CHROMA_URL: "http://chromadb:8000"
+
+  # Worker feature flags and defaults
+  USE_GITHUB_APP_AUTH: "false"
+  USE_LANGGRAPH: "true"
+  OPENAI_MODEL: "gpt-4o-mini"
+  GITHUB_API_URL: "https://api.github.com"
+
+  # API GitHub settings (non-secret defaults)
+  GITHUB_APP_ID: ""
+
+  # OpenTelemetry / Jaeger tracing
+  OTEL_ENABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+  OTEL_EXPORTER_OTLP_INSECURE: "true"
+  OTEL_SERVICE_NAME_API: "ai-code-review-api"
+  OTEL_SERVICE_NAME_WORKER: "ai-code-review-worker"
+
+  WORKER_METRICS_ENABLED: "true"
+  WORKER_METRICS_PORT: "9100"
+
+  # MLflow experiment tracking
+  MLFLOW_ENABLED: "true"
+  MLFLOW_TRACKING_URI: "http://mlflow:5000"
+  MLFLOW_EXPERIMENT_NAME: "ai-code-review"
+
+  # Browser-facing API URL for the dashboard (see README: baked at frontend build time)
+  NEXT_PUBLIC_API_URL: "http://localhost:8000"

@@ -1,0 +1,117 @@
+﻿apiVersion: v1
+data:
+  review-metrics.json: "{\r\n  \"annotations\": {\r\n    \"list\": []\r\n  },\r\n
+    \ \"editable\": true,\r\n  \"fiscalYearStartMonth\": 0,\r\n  \"graphTooltip\":
+    0,\r\n  \"id\": null,\r\n  \"links\": [],\r\n  \"panels\": [\r\n    {\r\n      \"datasource\":
+    {\r\n        \"type\": \"prometheus\",\r\n        \"uid\": \"prometheus\"\r\n
+    \     },\r\n      \"fieldConfig\": {\r\n        \"defaults\": {\r\n          \"color\":
+    {\r\n            \"mode\": \"palette-classic\"\r\n          },\r\n          \"mappings\":
+    [],\r\n          \"thresholds\": {\r\n            \"mode\": \"absolute\",\r\n
+    \           \"steps\": [\r\n              {\r\n                \"color\": \"green\",\r\n
+    \               \"value\": null\r\n              }\r\n            ]\r\n          },\r\n
+    \         \"unit\": \"none\"\r\n        },\r\n        \"overrides\": []\r\n      },\r\n
+    \     \"gridPos\": {\r\n        \"h\": 8,\r\n        \"w\": 6,\r\n        \"x\":
+    0,\r\n        \"y\": 0\r\n      },\r\n      \"id\": 1,\r\n      \"options\": {\r\n
+    \       \"colorMode\": \"value\",\r\n        \"graphMode\": \"area\",\r\n        \"justifyMode\":
+    \"auto\",\r\n        \"orientation\": \"auto\",\r\n        \"reduceOptions\":
+    {\r\n          \"calcs\": [\"lastNotNull\"],\r\n          \"fields\": \"\",\r\n
+    \         \"values\": false\r\n        },\r\n        \"textMode\": \"auto\"\r\n
+    \     },\r\n      \"targets\": [\r\n        {\r\n          \"datasource\": {\r\n
+    \           \"type\": \"prometheus\",\r\n            \"uid\": \"prometheus\"\r\n
+    \         },\r\n          \"expr\": \"review_jobs_total{job=\\\"worker\\\"}\",\r\n
+    \         \"legendFormat\": \"total reviews\",\r\n          \"refId\": \"A\"\r\n
+    \       }\r\n      ],\r\n      \"title\": \"Total Reviews\",\r\n      \"type\":
+    \"stat\"\r\n    },\r\n    {\r\n      \"datasource\": {\r\n        \"type\": \"prometheus\",\r\n
+    \       \"uid\": \"prometheus\"\r\n      },\r\n      \"fieldConfig\": {\r\n        \"defaults\":
+    {\r\n          \"color\": {\r\n            \"mode\": \"palette-classic\"\r\n          },\r\n
+    \         \"mappings\": [],\r\n          \"thresholds\": {\r\n            \"mode\":
+    \"absolute\",\r\n            \"steps\": [\r\n              {\r\n                \"color\":
+    \"green\",\r\n                \"value\": null\r\n              }\r\n            ]\r\n
+    \         },\r\n          \"unit\": \"none\"\r\n        },\r\n        \"overrides\":
+    []\r\n      },\r\n      \"gridPos\": {\r\n        \"h\": 8,\r\n        \"w\":
+    6,\r\n        \"x\": 6,\r\n        \"y\": 0\r\n      },\r\n      \"id\": 2,\r\n
+    \     \"options\": {\r\n        \"colorMode\": \"value\",\r\n        \"graphMode\":
+    \"area\",\r\n        \"justifyMode\": \"auto\",\r\n        \"orientation\": \"auto\",\r\n
+    \       \"reduceOptions\": {\r\n          \"calcs\": [\"lastNotNull\"],\r\n          \"fields\":
+    \"\",\r\n          \"values\": false\r\n        },\r\n        \"textMode\": \"auto\"\r\n
+    \     },\r\n      \"targets\": [\r\n        {\r\n          \"datasource\": {\r\n
+    \           \"type\": \"prometheus\",\r\n            \"uid\": \"prometheus\"\r\n
+    \         },\r\n          \"expr\": \"review_jobs_success_total{job=\\\"worker\\\"}\",\r\n
+    \         \"legendFormat\": \"successful\",\r\n          \"refId\": \"A\"\r\n
+    \       }\r\n      ],\r\n      \"title\": \"Successful Reviews\",\r\n      \"type\":
+    \"stat\"\r\n    },\r\n    {\r\n      \"datasource\": {\r\n        \"type\": \"prometheus\",\r\n
+    \       \"uid\": \"prometheus\"\r\n      },\r\n      \"fieldConfig\": {\r\n        \"defaults\":
+    {\r\n          \"color\": {\r\n            \"mode\": \"palette-classic\"\r\n          },\r\n
+    \         \"mappings\": [],\r\n          \"thresholds\": {\r\n            \"mode\":
+    \"absolute\",\r\n            \"steps\": [\r\n              {\r\n                \"color\":
+    \"red\",\r\n                \"value\": null\r\n              }\r\n            ]\r\n
+    \         },\r\n          \"unit\": \"none\"\r\n        },\r\n        \"overrides\":
+    []\r\n      },\r\n      \"gridPos\": {\r\n        \"h\": 8,\r\n        \"w\":
+    6,\r\n        \"x\": 12,\r\n        \"y\": 0\r\n      },\r\n      \"id\": 3,\r\n
+    \     \"options\": {\r\n        \"colorMode\": \"value\",\r\n        \"graphMode\":
+    \"area\",\r\n        \"justifyMode\": \"auto\",\r\n        \"orientation\": \"auto\",\r\n
+    \       \"reduceOptions\": {\r\n          \"calcs\": [\"lastNotNull\"],\r\n          \"fields\":
+    \"\",\r\n          \"values\": false\r\n        },\r\n        \"textMode\": \"auto\"\r\n
+    \     },\r\n      \"targets\": [\r\n        {\r\n          \"datasource\": {\r\n
+    \           \"type\": \"prometheus\",\r\n            \"uid\": \"prometheus\"\r\n
+    \         },\r\n          \"expr\": \"review_jobs_failed_total{job=\\\"worker\\\"}\",\r\n
+    \         \"legendFormat\": \"failed\",\r\n          \"refId\": \"A\"\r\n        }\r\n
+    \     ],\r\n      \"title\": \"Failed Reviews\",\r\n      \"type\": \"stat\"\r\n
+    \   },\r\n    {\r\n      \"datasource\": {\r\n        \"type\": \"prometheus\",\r\n
+    \       \"uid\": \"prometheus\"\r\n      },\r\n      \"fieldConfig\": {\r\n        \"defaults\":
+    {\r\n          \"color\": {\r\n            \"mode\": \"palette-classic\"\r\n          },\r\n
+    \         \"mappings\": [],\r\n          \"thresholds\": {\r\n            \"mode\":
+    \"absolute\",\r\n            \"steps\": [\r\n              {\r\n                \"color\":
+    \"blue\",\r\n                \"value\": null\r\n              }\r\n            ]\r\n
+    \         },\r\n          \"unit\": \"none\"\r\n        },\r\n        \"overrides\":
+    []\r\n      },\r\n      \"gridPos\": {\r\n        \"h\": 8,\r\n        \"w\":
+    6,\r\n        \"x\": 18,\r\n        \"y\": 0\r\n      },\r\n      \"id\": 4,\r\n
+    \     \"options\": {\r\n        \"colorMode\": \"value\",\r\n        \"graphMode\":
+    \"area\",\r\n        \"justifyMode\": \"auto\",\r\n        \"orientation\": \"auto\",\r\n
+    \       \"reduceOptions\": {\r\n          \"calcs\": [\"lastNotNull\"],\r\n          \"fields\":
+    \"\",\r\n          \"values\": false\r\n        },\r\n        \"textMode\": \"auto\"\r\n
+    \     },\r\n      \"targets\": [\r\n        {\r\n          \"datasource\": {\r\n
+    \           \"type\": \"prometheus\",\r\n            \"uid\": \"prometheus\"\r\n
+    \         },\r\n          \"expr\": \"review_comments_published_total{job=\\\"worker\\\"}\",\r\n
+    \         \"legendFormat\": \"published\",\r\n          \"refId\": \"A\"\r\n        }\r\n
+    \     ],\r\n      \"title\": \"Comments Published\",\r\n      \"type\": \"stat\"\r\n
+    \   },\r\n    {\r\n      \"datasource\": {\r\n        \"type\": \"prometheus\",\r\n
+    \       \"uid\": \"prometheus\"\r\n      },\r\n      \"fieldConfig\": {\r\n        \"defaults\":
+    {\r\n          \"color\": {\r\n            \"mode\": \"palette-classic\"\r\n          },\r\n
+    \         \"custom\": {\r\n            \"axisBorderShow\": false,\r\n            \"axisCenteredZero\":
+    false,\r\n            \"axisColorMode\": \"text\",\r\n            \"axisLabel\":
+    \"\",\r\n            \"axisPlacement\": \"auto\",\r\n            \"barAlignment\":
+    0,\r\n            \"drawStyle\": \"line\",\r\n            \"fillOpacity\": 10,\r\n
+    \           \"gradientMode\": \"none\",\r\n            \"hideFrom\": {\r\n              \"legend\":
+    false,\r\n              \"tooltip\": false,\r\n              \"viz\": false\r\n
+    \           },\r\n            \"insertNulls\": false,\r\n            \"lineInterpolation\":
+    \"linear\",\r\n            \"lineWidth\": 1,\r\n            \"pointSize\": 5,\r\n
+    \           \"scaleDistribution\": {\r\n              \"type\": \"linear\"\r\n
+    \           },\r\n            \"showPoints\": \"auto\",\r\n            \"spanNulls\":
+    false,\r\n            \"stacking\": {\r\n              \"group\": \"A\",\r\n              \"mode\":
+    \"none\"\r\n            },\r\n            \"thresholdsStyle\": {\r\n              \"mode\":
+    \"off\"\r\n            }\r\n          },\r\n          \"mappings\": [],\r\n          \"thresholds\":
+    {\r\n            \"mode\": \"absolute\",\r\n            \"steps\": [\r\n              {\r\n
+    \               \"color\": \"green\",\r\n                \"value\": null\r\n              }\r\n
+    \           ]\r\n          },\r\n          \"unit\": \"s\"\r\n        },\r\n        \"overrides\":
+    []\r\n      },\r\n      \"gridPos\": {\r\n        \"h\": 9,\r\n        \"w\":
+    24,\r\n        \"x\": 0,\r\n        \"y\": 8\r\n      },\r\n      \"id\": 5,\r\n
+    \     \"options\": {\r\n        \"legend\": {\r\n          \"calcs\": [],\r\n
+    \         \"displayMode\": \"list\",\r\n          \"placement\": \"bottom\",\r\n
+    \         \"showLegend\": true\r\n        },\r\n        \"tooltip\": {\r\n          \"mode\":
+    \"single\",\r\n          \"sort\": \"none\"\r\n        }\r\n      },\r\n      \"targets\":
+    [\r\n        {\r\n          \"datasource\": {\r\n            \"type\": \"prometheus\",\r\n
+    \           \"uid\": \"prometheus\"\r\n          },\r\n          \"expr\": \"rate(review_pipeline_duration_seconds_sum{job=\\\"worker\\\"}[5m])
+    / rate(review_pipeline_duration_seconds_count{job=\\\"worker\\\"}[5m])\",\r\n
+    \         \"legendFormat\": \"avg duration\",\r\n          \"refId\": \"A\"\r\n
+    \       }\r\n      ],\r\n      \"title\": \"Review Pipeline Duration (avg)\",\r\n
+    \     \"type\": \"timeseries\"\r\n    }\r\n  ],\r\n  \"refresh\": \"10s\",\r\n
+    \ \"schemaVersion\": 39,\r\n  \"tags\": [\"ai-code-review\", \"reviews\"],\r\n
+    \ \"templating\": {\r\n    \"list\": []\r\n  },\r\n  \"time\": {\r\n    \"from\":
+    \"now-1h\",\r\n    \"to\": \"now\"\r\n  },\r\n  \"timepicker\": {},\r\n  \"timezone\":
+    \"browser\",\r\n  \"title\": \"AI Code Review Metrics\",\r\n  \"uid\": \"ai-code-review-metrics\",\r\n
+    \ \"version\": 1,\r\n  \"weekStart\": \"\"\r\n}\r\n"
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: code-review

@@ -1,0 +1,192 @@
+{{- if .Values.worker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.worker.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "worker") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.worker.service.type }}
+  selector:
+    {{- include "ai-code-review.componentSelectorLabels" (dict "component" "worker") | nindent 4 }}
+  ports:
+    - name: metrics
+      port: {{ .Values.worker.service.port }}
+      targetPort: {{ .Values.worker.metricsPort }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.worker.service.name }}
+  namespace: {{ include "ai-code-review.namespace" . }}
+  labels:
+    {{- include "ai-code-review.componentLabels" (dict "component" "worker") | nindent 4 }}
+    {{- include "ai-code-review.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ai-code-review.componentSelectorLabels" (dict "component" "worker") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ai-code-review.componentLabels" (dict "component" "worker") | nindent 8 }}
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ include "ai-code-review.image" .Values.initContainer.image }}
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ .Values.postgres.service.name }} {{ .Values.postgres.service.port }}; do
+                echo "waiting for postgres..."
+                sleep 2
+              done
+        - name: wait-for-redis
+          image: {{ include "ai-code-review.image" .Values.initContainer.image }}
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ .Values.redis.service.name }} {{ .Values.redis.service.port }}; do
+                echo "waiting for redis..."
+                sleep 2
+              done
+        - name: wait-for-api
+          image: {{ include "ai-code-review.image" .Values.initContainer.image }}
+          command:
+            - sh
+            - -c
+            - |
+              until wget -qO- http://{{ .Values.api.service.name }}:{{ .Values.api.service.port }}/health; do
+                echo "waiting for api migrations..."
+                sleep 3
+              done
+      containers:
+        - name: worker
+          image: {{ include "ai-code-review.image" .Values.worker.image }}
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "ai-code-review.configMapName" . }}
+            {{- if .Values.secret.create }}
+            - secretRef:
+                name: {{ include "ai-code-review.secretName" . }}
+            {{- end }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ai-code-review.secretName" . }}
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: REDIS_URL
+            - name: CHROMA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: CHROMA_URL
+            - name: USE_GITHUB_APP_AUTH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: USE_GITHUB_APP_AUTH
+            - name: USE_LANGGRAPH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: USE_LANGGRAPH
+            - name: OPENAI_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: OPENAI_MODEL
+            - name: GITHUB_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: GITHUB_API_URL
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ai-code-review.secretName" . }}
+                  key: GITHUB_TOKEN
+            - name: GITHUB_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ai-code-review.secretName" . }}
+                  key: GITHUB_PRIVATE_KEY
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ai-code-review.secretName" . }}
+                  key: OPENAI_API_KEY
+            - name: OPENAI_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ai-code-review.secretName" . }}
+                  key: OPENAI_BASE_URL
+            - name: OTEL_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: OTEL_ENABLED
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: OTEL_EXPORTER_OTLP_INSECURE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: OTEL_EXPORTER_OTLP_INSECURE
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: OTEL_SERVICE_NAME_WORKER
+            - name: WORKER_METRICS_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: WORKER_METRICS_ENABLED
+            - name: WORKER_METRICS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: WORKER_METRICS_PORT
+            - name: MLFLOW_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: MLFLOW_ENABLED
+            - name: MLFLOW_TRACKING_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: MLFLOW_TRACKING_URI
+            - name: MLFLOW_EXPERIMENT_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "ai-code-review.configMapName" . }}
+                  key: MLFLOW_EXPERIMENT_NAME
+          ports:
+            - containerPort: {{ .Values.worker.metricsPort }}
+              name: metrics
+          volumeMounts:
+            - name: mlflow-data
+              mountPath: /mlflow
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      volumes:
+        - name: mlflow-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.mlflow.persistence.claimName }}
+{{- end }}

@@ -1,0 +1,253 @@
+# Default values for ai-code-review.
+# These defaults mirror infrastructure/k8s/ plain manifests.
+
+nameOverride: ""
+fullnameOverride: ""
+
+namespace:
+  create: true
+  name: code-review
+
+configMap:
+  name: code-review-config
+
+secret:
+  name: code-review-secrets
+  create: true
+  postgresPassword: change-me
+  # Leave empty to auto-build from postgres settings and service DNS.
+  databaseUrl: ""
+  githubWebhookSecret: ""
+  githubToken: ""
+  githubPrivateKey: ""
+  openaiApiKey: ""
+  openaiBaseUrl: ""
+
+env:
+  postgresUser: postgres
+  postgresDb: code_review
+  # Leave empty to auto-build from in-cluster service names and ports.
+  redisUrl: ""
+  chromaUrl: ""
+  useGithubAppAuth: "false"
+  useLanggraph: "true"
+  openaiModel: gpt-4o-mini
+  githubApiUrl: https://api.github.com
+  githubAppId: ""
+  nextPublicApiUrl: http://localhost:8000
+  otelEnabled: "true"
+  otelExporterOtlpEndpoint: http://jaeger:4317
+  otelExporterOtlpInsecure: "true"
+  otelServiceNameApi: ai-code-review-api
+  otelServiceNameWorker: ai-code-review-worker
+  workerMetricsEnabled: "true"
+  workerMetricsPort: "9100"
+  mlflowEnabled: "true"
+  mlflowTrackingUri: http://mlflow:5000
+  mlflowExperimentName: ai-code-review
+
+jaeger:
+  enabled: true
+  image:
+    repository: jaegertracing/all-in-one
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: jaeger
+    type: ClusterIP
+    uiPort: 16686
+    otlpPort: 4317
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+mlflow:
+  enabled: true
+  allowedHosts: "mlflow:5000,localhost:*,127.0.0.1:*"
+  persistence:
+    claimName: mlflow-data
+    size: 1Gi
+  image:
+    repository: ghcr.io/mlflow/mlflow
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: mlflow
+    type: ClusterIP
+    port: 5000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+initContainer:
+  image:
+    repository: busybox
+    tag: "1.36"
+    pullPolicy: IfNotPresent
+
+postgres:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: postgres
+    tag: 16-alpine
+    pullPolicy: IfNotPresent
+  service:
+    name: postgres
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  persistence:
+    enabled: true
+    size: 5Gi
+    accessMode: ReadWriteOnce
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+redis:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: 7-alpine
+    pullPolicy: IfNotPresent
+  service:
+    name: redis
+    type: ClusterIP
+    port: 6379
+    targetPort: 6379
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+chromadb:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: chromadb/chroma
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: chromadb
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  persistence:
+    enabled: true
+    size: 5Gi
+    accessMode: ReadWriteOnce
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+api:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: code-review-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: api
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+prometheus:
+  enabled: true
+  image:
+    repository: prom/prometheus
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: prometheus
+    type: ClusterIP
+    port: 9090
+    targetPort: 9090
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+grafana:
+  enabled: true
+  image:
+    repository: grafana/grafana
+    tag: latest
+    pullPolicy: IfNotPresent
+  adminUser: admin
+  adminPassword: admin
+  service:
+    name: grafana
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+worker:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: code-review-worker
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: worker
+    type: ClusterIP
+    port: 9100
+    targetPort: 9100
+  metricsPort: 9100
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: code-review-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: frontend
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
