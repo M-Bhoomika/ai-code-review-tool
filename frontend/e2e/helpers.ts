@@ -1,6 +1,10 @@
 export const API_BASE_URL =
   process.env.E2E_API_URL ?? "http://localhost:8000";
 
+/** API base URL for the Docker E2E stack (port 8010). */
+export const INTEGRATION_API_BASE_URL =
+  process.env.E2E_INTEGRATION_API_URL ?? "http://localhost:8010";
+
 export const sampleReview = {
   id: "e2e-review-001",
   repositoryName: "octocat/hello-world",

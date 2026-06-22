@@ -298,9 +298,17 @@ const Dashboard: NextPage = () => {
 
           </form>
 
-          {formMessage && <p className="form-ok">{formMessage}</p>}
+          {formMessage && (
+            <p className="form-ok" data-testid="review-queue-success">
+              {formMessage}
+            </p>
+          )}
 
-          {formError && <p className="form-err">{formError}</p>}
+          {formError && (
+            <p className="form-err" data-testid="review-queue-error">
+              {formError}
+            </p>
+          )}
 
         </section>
 

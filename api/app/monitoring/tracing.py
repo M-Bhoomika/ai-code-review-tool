@@ -64,6 +64,32 @@ def setup_tracing(
     return _provider
 
 
+def _patch_fastapi_route_details_for_cors() -> None:
+    """Avoid OTEL span naming crashes on CORS preflight (OPTIONS) requests.
+
+    FastAPIInstrumentor assumes every matched route exposes ``path``. Strawberry's
+    GraphQL router uses Starlette ``_IncludedRouter``, which lacks that attribute
+    and causes OPTIONS preflight to return 500 before CORSMiddleware can respond.
+    """
+    import opentelemetry.instrumentation.fastapi as otel_fastapi
+
+    if getattr(otel_fastapi, "_ai_code_review_route_details_patched", False):
+        return
+
+    original = otel_fastapi._get_route_details
+
+    def _safe_get_route_details(scope):  # type: ignore[no-untyped-def]
+        if scope.get("method") == "OPTIONS":
+            return scope.get("path") or "OPTIONS", {}
+        try:
+            return original(scope)
+        except AttributeError:
+            return scope.get("path") or "http.request", {}
+
+    otel_fastapi._get_route_details = _safe_get_route_details
+    otel_fastapi._ai_code_review_route_details_patched = True
+
+
 def instrument_app(app: object) -> None:
     """Auto-instrument FastAPI and the Celery producer client."""
     global _instrumented
@@ -74,6 +100,7 @@ def instrument_app(app: object) -> None:
     from opentelemetry.instrumentation.celery import CeleryInstrumentor
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
+    _patch_fastapi_route_details_for_cors()
     FastAPIInstrumentor.instrument_app(app)
     CeleryInstrumentor().instrument()
     _instrumented = True

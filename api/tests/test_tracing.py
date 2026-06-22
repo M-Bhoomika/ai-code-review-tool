@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from opentelemetry import trace
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -44,6 +45,38 @@ def test_fastapi_request_creates_http_span():
     spans = exporter.get_finished_spans()
     assert spans
     assert any("health" in span.name for span in spans)
+
+
+def test_options_preflight_does_not_crash_with_otel():
+    """CORS preflight must succeed when tracing is enabled (browser dashboard)."""
+    exporter = InMemorySpanExporter()
+    tracing.setup_tracing(exporter=exporter)
+
+    app = FastAPI()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    @app.post("/reviews/jobs")
+    def trigger_review() -> dict[str, str]:
+        return {"status": "queued"}
+
+    tracing.instrument_app(app)
+    client = TestClient(app)
+    response = client.options(
+        "/reviews/jobs",
+        headers={
+            "Origin": "http://localhost:3010",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "*"
 
 
 def test_manual_span_records_attributes():
